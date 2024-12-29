@@ -1,0 +1,268 @@
+import React, { useState, useEffect } from 'react';
+import { 
+  Send, 
+  Facebook, 
+  Instagram, 
+  Twitter, 
+  WhatsApp, 
+  Image as ImageIcon, 
+  Video, 
+  Link, 
+  Globe, 
+  Camera,
+  Share2,
+  Eye,
+  Lock,
+  Users,
+  Settings
+} from 'lucide-react';
+
+// Social Media Integration Component
+const SocialMediaIntegration = () => {
+  const [connectedAccounts, setConnectedAccounts] = useState({
+    facebook: false,
+    instagram: false,
+    twitter: false,
+    whatsapp: false
+  });
+
+  const [status, setStatus] = useState('');
+  const [mediaAttachments, setMediaAttachments] = useState([]);
+  const [privacy, setPrivacy] = useState('friends');
+  const [selectedPlatforms, setSelectedPlatforms] = useState([]);
+  const [isPreview, setIsPreview] = useState(false);
+
+  // Status Update Preview Component
+  const StatusPreview = ({ platform, content, media }) => (
+    <div className="border rounded-lg p-4 mb-4 bg-white shadow">
+      <div className="flex items-center mb-2">
+        {platform === 'facebook' && <Facebook className="text-blue-600" />}
+        {platform === 'instagram' && <Instagram className="text-pink-600" />}
+        {platform === 'twitter' && <Twitter className="text-blue-400" />}
+        {platform === 'whatsapp' && <WhatsApp className="text-green-500" />}
+        <span className="ml-2 font-semibold">{platform.charAt(0).toUpperCase() + platform.slice(1)} Preview</span>
+      </div>
+      <p className="text-gray-800">{content}</p>
+      {media.length > 0 && (
+        <div className="grid grid-cols-2 gap-2 mt-2">
+          {media.map((item, index) => (
+            <div key={index} className="relative">
+              <img src={item.preview} alt="Media preview" className="rounded" />
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
+  const connectSocialAccount = (platform) => {
+    // Simulated OAuth flow
+    setConnectedAccounts(prev => ({
+      ...prev,
+      [platform]: true
+    }));
+  };
+
+  return (
+    <div className="bg-gray-50 min-h-screen">
+      <div className="max-w-4xl mx-auto p-4">
+        {/* Header */}
+        <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+          <h1 className="text-2xl font-bold mb-4">Social Media Dashboard</h1>
+          
+          {/* Connected Accounts */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <button 
+              onClick={() => connectSocialAccount('facebook')}
+              className={`flex items-center justify-center p-4 rounded-lg ${
+                connectedAccounts.facebook ? 'bg-blue-100 text-blue-600' : 'bg-gray-100'
+              }`}
+            >
+              <Facebook className="mr-2" />
+              {connectedAccounts.facebook ? 'Connected' : 'Connect Facebook'}
+            </button>
+            
+            <button 
+              onClick={() => connectSocialAccount('instagram')}
+              className={`flex items-center justify-center p-4 rounded-lg ${
+                connectedAccounts.instagram ? 'bg-pink-100 text-pink-600' : 'bg-gray-100'
+              }`}
+            >
+              <Instagram className="mr-2" />
+              {connectedAccounts.instagram ? 'Connected' : 'Connect Instagram'}
+            </button>
+            
+            <button 
+              onClick={() => connectSocialAccount('twitter')}
+              className={`flex items-center justify-center p-4 rounded-lg ${
+                connectedAccounts.twitter ? 'bg-blue-100 text-blue-400' : 'bg-gray-100'
+              }`}
+            >
+              <Twitter className="mr-2" />
+              {connectedAccounts.twitter ? 'Connected' : 'Connect Twitter'}
+            </button>
+            
+            <button 
+              onClick={() => connectSocialAccount('whatsapp')}
+              className={`flex items-center justify-center p-4 rounded-lg ${
+                connectedAccounts.whatsapp ? 'bg-green-100 text-green-500' : 'bg-gray-100'
+              }`}
+            >
+              <WhatsApp className="mr-2" />
+              {connectedAccounts.whatsapp ? 'Connected' : 'Connect WhatsApp'}
+            </button>
+          </div>
+
+          {/* Status Update Form */}
+          <div className="bg-white rounded-lg p-6">
+            <textarea
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
+              placeholder="What's on your mind?"
+              className="w-full p-4 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              rows={4}
+            />
+
+            {/* Media Attachments */}
+            <div className="flex space-x-4 mb-4">
+              <button className="flex items-center text-gray-600 hover:text-blue-500">
+                <ImageIcon className="mr-2" />
+                Photo
+              </button>
+              <button className="flex items-center text-gray-600 hover:text-blue-500">
+                <Video className="mr-2" />
+                Video
+              </button>
+              <button className="flex items-center text-gray-600 hover:text-blue-500">
+                <Link className="mr-2" />
+                Link
+              </button>
+            </div>
+
+            {/* Privacy Settings */}
+            <div className="flex items-center mb-4">
+              <select
+                value={privacy}
+                onChange={(e) => setPrivacy(e.target.value)}
+                className="p-2 border rounded-lg mr-4"
+              >
+                <option value="public">🌍 Public</option>
+                <option value="friends">👥 Friends</option>
+                <option value="private">🔒 Private</option>
+              </select>
+
+              {/* Platform Selection */}
+              <div className="flex space-x-2">
+                {Object.entries(connectedAccounts).map(([platform, isConnected]) => (
+                  isConnected && (
+                    <button
+                      key={platform}
+                      onClick={() => setSelectedPlatforms(prev => 
+                        prev.includes(platform) 
+                          ? prev.filter(p => p !== platform)
+                          : [...prev, platform]
+                      )}
+                      className={`p-2 rounded-full ${
+                        selectedPlatforms.includes(platform)
+                          ? 'bg-blue-100 text-blue-600'
+                          : 'bg-gray-100 text-gray-600'
+                      }`}
+                    >
+                      {platform === 'facebook' && <Facebook size={20} />}
+                      {platform === 'instagram' && <Instagram size={20} />}
+                      {platform === 'twitter' && <Twitter size={20} />}
+                      {platform === 'whatsapp' && <WhatsApp size={20} />}
+                    </button>
+                  )
+                ))}
+              </div>
+            </div>
+
+            {/* Preview Button */}
+            <button
+              onClick={() => setIsPreview(!isPreview)}
+              className="mb-4 flex items-center text-blue-500 hover:text-blue-600"
+            >
+              <Eye className="mr-2" />
+              {isPreview ? 'Hide Preview' : 'Show Preview'}
+            </button>
+
+            {/* Preview Section */}
+            {isPreview && (
+              <div className="mb-4">
+                {selectedPlatforms.map(platform => (
+                  <StatusPreview
+                    key={platform}
+                    platform={platform}
+                    content={status}
+                    media={mediaAttachments}
+                  />
+                ))}
+              </div>
+            )}
+
+            {/* Post Button */}
+            <button
+              onClick={() => {
+                // Implement post to selected platforms
+                alert('Status updated across selected platforms!');
+              }}
+              className="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 flex items-center justify-center"
+            >
+              <Share2 className="mr-2" />
+              Post to Selected Platforms
+            </button>
+          </div>
+        </div>
+
+        {/* Recent Updates */}
+        <div className="bg-white rounded-lg shadow-lg p-6">
+          <h2 className="text-xl font-bold mb-4">Recent Updates</h2>
+          <div className="space-y-4">
+            {/* Recent posts would be mapped here */}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Add the social media component to the main app
+const ZikhoVahAppWithSocial = () => {
+  const [activeTab, setActiveTab] = useState('chat');
+
+  return (
+    <div className="flex h-screen">
+      {/* Sidebar Navigation */}
+      <div className="w-20 bg-white border-r flex flex-col items-center py-4">
+        <button 
+          onClick={() => setActiveTab('chat')}
+          className={`p-3 rounded-lg mb-4 ${activeTab === 'chat' ? 'bg-blue-100 text-blue-600' : ''}`}
+        >
+          <Globe />
+        </button>
+        <button 
+          onClick={() => setActiveTab('social')}
+          className={`p-3 rounded-lg mb-4 ${activeTab === 'social' ? 'bg-blue-100 text-blue-600' : ''}`}
+        >
+          <Share2 />
+        </button>
+        <button 
+          onClick={() => setActiveTab('settings')}
+          className={`p-3 rounded-lg ${activeTab === 'settings' ? 'bg-blue-100 text-blue-600' : ''}`}
+        >
+          <Settings />
+        </button>
+      </div>
+
+      {/* Main Content Area */}
+      <div className="flex-1">
+        {activeTab === 'chat' && <div>Chat Interface</div>}
+        {activeTab === 'social' && <SocialMediaIntegration />}
+        {activeTab === 'settings' && <div>Settings Panel</div>}
+      </div>
+    </div>
+  );
+};
+
+export default ZikhoVahAppWithSocial;

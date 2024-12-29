@@ -1,0 +1,323 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { Phone, Video, Mic, Image, Send, Smile, Bot, Camera, Edit3, User, Wand2 } from 'lucide-react';
+
+// AI Assistant configurations
+const aiAssistantTypes = {
+  CULTURAL_GUIDE: {
+    name: "uBuntu Guide",
+    avatar: "/api/placeholder/50/50",
+    description: "Expert in South African cultures and traditions",
+    languages: ["English", "Zulu", "Xhosa", "Sotho"]
+  },
+  LANGUAGE_TUTOR: {
+    name: "Lingo Mentor",
+    avatar: "/api/placeholder/50/50",
+    description: "Helps with local language learning",
+    languages: ["All official SA languages"]
+  },
+  PERSONAL_ASSISTANT: {
+    name: "iGqwetha",
+    avatar: "/api/placeholder/50/50",
+    description: "Personal AI assistant with local context",
+    languages: ["Adaptable to user preference"]
+  }
+};
+
+// Avatar customization options
+const avatarCustomizationOptions = {
+  skinTones: ["light", "medium", "dark", "very-dark"],
+  hairStyles: ["natural", "braids", "dreadlocks", "afro", "short", "long"],
+  culturalAttire: ["Traditional", "Modern", "Fusion", "Formal", "Casual"],
+  accessories: ["Beads", "Headwrap", "Bangles", "Necklaces", "None"]
+};
+
+const ZikhoVahAIApp = () => {
+  const [messages, setMessages] = useState([]);
+  const [newMessage, setNewMessage] = useState('');
+  const [selectedContact, setSelectedContact] = useState(null);
+  const [activeAI, setActiveAI] = useState(null);
+  const [customAvatar, setCustomAvatar] = useState(null);
+  const [isAvatarCreator, setIsAvatarCreator] = useState(false);
+  const [avatarSettings, setAvatarSettings] = useState({
+    skinTone: "medium",
+    hairStyle: "natural",
+    culturalAttire: "Traditional",
+    accessories: ["Beads"]
+  });
+  const messagesEndRef = useRef(null);
+
+  // AI Response Generation
+  const generateAIResponse = async (message) => {
+    // Simulated AI response based on context
+    const responses = {
+      CULTURAL_GUIDE: "Let me share some cultural insights about that...",
+      LANGUAGE_TUTOR: "Here's how you can say that in different languages...",
+      PERSONAL_ASSISTANT: "I can help you manage that task..."
+    };
+    
+    return {
+      id: messages.length + 1,
+      sender: activeAI.name,
+      text: responses[activeAI.type],
+      timestamp: new Date().toLocaleTimeString(),
+      isAI: true
+    };
+  };
+
+  // Avatar Creation Component
+  const AvatarCreator = () => (
+    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+      <div className="bg-white p-6 rounded-lg shadow-xl w-96">
+        <h2 className="text-2xl font-bold mb-4">Create Your Cultural Avatar</h2>
+        
+        {/* Avatar Preview */}
+        <div className="mb-6">
+          <div className="w-32 h-32 mx-auto bg-gray-200 rounded-full mb-2">
+            {/* Avatar preview would be rendered here */}
+            <img 
+              src="/api/placeholder/128/128"
+              alt="Avatar Preview"
+              className="w-full h-full rounded-full"
+            />
+          </div>
+        </div>
+
+        {/* Customization Options */}
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium mb-1">Skin Tone</label>
+            <select 
+              className="w-full p-2 border rounded"
+              value={avatarSettings.skinTone}
+              onChange={(e) => setAvatarSettings({...avatarSettings, skinTone: e.target.value})}
+            >
+              {avatarCustomizationOptions.skinTones.map(tone => (
+                <option key={tone} value={tone}>{tone}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">Hair Style</label>
+            <select 
+              className="w-full p-2 border rounded"
+              value={avatarSettings.hairStyle}
+              onChange={(e) => setAvatarSettings({...avatarSettings, hairStyle: e.target.value})}
+            >
+              {avatarCustomizationOptions.hairStyles.map(style => (
+                <option key={style} value={style}>{style}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">Cultural Attire</label>
+            <select 
+              className="w-full p-2 border rounded"
+              value={avatarSettings.culturalAttire}
+              onChange={(e) => setAvatarSettings({...avatarSettings, culturalAttire: e.target.value})}
+            >
+              {avatarCustomizationOptions.culturalAttire.map(attire => (
+                <option key={attire} value={attire}>{attire}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">Accessories</label>
+            <div className="grid grid-cols-2 gap-2">
+              {avatarCustomizationOptions.accessories.map(accessory => (
+                <label key={accessory} className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={avatarSettings.accessories.includes(accessory)}
+                    onChange={(e) => {
+                      const newAccessories = e.target.checked
+                        ? [...avatarSettings.accessories, accessory]
+                        : avatarSettings.accessories.filter(a => a !== accessory);
+                      setAvatarSettings({...avatarSettings, accessories: newAccessories});
+                    }}
+                    className="mr-2"
+                  />
+                  {accessory}
+                </label>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="mt-6 flex justify-end space-x-4">
+          <button
+            onClick={() => setIsAvatarCreator(false)}
+            className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={() => {
+              // Here we would generate the avatar based on settings
+              setCustomAvatar("/api/placeholder/128/128");
+              setIsAvatarCreator(false);
+            }}
+            className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+          >
+            Create Avatar
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
+  // AI Assistant Selection Component
+  const AIAssistantSelector = () => (
+    <div className="p-4 border-b">
+      <h3 className="font-bold mb-2">AI Assistants</h3>
+      <div className="space-y-2">
+        {Object.entries(aiAssistantTypes).map(([type, ai]) => (
+          <button
+            key={type}
+            onClick={() => setActiveAI({...ai, type})}
+            className={`w-full p-2 rounded flex items-center ${
+              activeAI?.type === type ? 'bg-green-100 text-green-700' : 'hover:bg-gray-100'
+            }`}
+          >
+            <Bot className="mr-2" size={20} />
+            <div className="text-left">
+              <div className="font-medium">{ai.name}</div>
+              <div className="text-sm text-gray-500">{ai.description}</div>
+            </div>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="flex h-screen bg-gradient-to-br from-yellow-100 to-orange-100">
+      {/* Sidebar */}
+      <div className="w-1/4 bg-white border-r shadow-lg flex flex-col">
+        {/* User Profile */}
+        <div className="p-4 bg-gradient-to-r from-green-600 to-yellow-500">
+          <div className="flex items-center space-x-4">
+            <div className="relative">
+              <img 
+                src={customAvatar || "/api/placeholder/64/64"} 
+                alt="Your Avatar" 
+                className="w-16 h-16 rounded-full"
+              />
+              <button
+                onClick={() => setIsAvatarCreator(true)}
+                className="absolute bottom-0 right-0 bg-white p-1 rounded-full shadow-lg"
+              >
+                <Edit3 size={16} />
+              </button>
+            </div>
+            <div className="flex-1">
+              <h2 className="text-white font-bold">Your Profile</h2>
+              <button
+                onClick={() => setIsAvatarCreator(true)}
+                className="text-sm bg-white bg-opacity-20 text-white px-2 py-1 rounded-full"
+              >
+                Customize Avatar
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* AI Assistant Selector */}
+        <AIAssistantSelector />
+
+        {/* Contact List */}
+        <div className="flex-1 overflow-y-auto">
+          {/* Your existing contact list code */}
+        </div>
+      </div>
+
+      {/* Main Chat Area */}
+      <div className="flex-1 flex flex-col">
+        {/* Chat Header */}
+        {activeAI && (
+          <div className="bg-white shadow p-4 flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <Bot size={24} className="text-green-600" />
+              <div>
+                <h3 className="font-bold">{activeAI.name}</h3>
+                <p className="text-sm text-gray-500">{activeAI.description}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Messages Area */}
+        <div className="flex-1 overflow-y-auto p-4">
+          {messages.map((message) => (
+            <div
+              key={message.id}
+              className={`flex mb-4 ${message.sender === 'me' ? 'justify-end' : 'justify-start'}`}
+            >
+              <div
+                className={`max-w-md p-3 rounded-lg ${
+                  message.sender === 'me'
+                    ? 'bg-green-600 text-white'
+                    : 'bg-white shadow-md'
+                }`}
+              >
+                {message.isAI && <Bot size={16} className="mb-1" />}
+                {message.text}
+                <div className="text-xs opacity-70 mt-1">{message.timestamp}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Message Input */}
+        <div className="bg-white p-4 flex items-center space-x-4">
+          <button className="text-green-600 hover:bg-green-100 p-2 rounded-full">
+            <Smile />
+          </button>
+          <button className="text-green-600 hover:bg-green-100 p-2 rounded-full">
+            <Image />
+          </button>
+          <button className="text-green-600 hover:bg-green-100 p-2 rounded-full">
+            <Mic />
+          </button>
+          <input
+            type="text"
+            placeholder="Message or ask AI assistant..."
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            className="flex-1 p-2 border rounded-full focus:outline-none focus:ring-2 focus:ring-green-500"
+          />
+          <button
+            onClick={async () => {
+              if (newMessage.trim()) {
+                const userMessage = {
+                  id: messages.length + 1,
+                  sender: 'me',
+                  text: newMessage,
+                  timestamp: new Date().toLocaleTimeString()
+                };
+                setMessages([...messages, userMessage]);
+                setNewMessage('');
+                
+                if (activeAI) {
+                  const aiResponse = await generateAIResponse(newMessage);
+                  setMessages(msgs => [...msgs, aiResponse]);
+                }
+              }
+            }}
+            className="bg-green-600 text-white p-2 rounded-full hover:bg-green-700"
+          >
+            <Send />
+          </button>
+        </div>
+      </div>
+
+      {/* Avatar Creator Modal */}
+      {isAvatarCreator && <AvatarCreator />}
+    </div>
+  );
+};
+
+export default ZikhoVahAIApp;
